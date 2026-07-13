@@ -3,6 +3,9 @@ import tkinter as tk
 from config import BG_COLOUR, WINDOW_TITLE, WINDOW_SIZE
 from pages.main_menu import MainMenu
 from pages.new_game import NewGame
+from pages.how_to_play import HowToPlay
+from pages.edit_rules import EditRules
+from pages.add_game import AddGame
 
 class App(tk.Tk):
     """
@@ -10,7 +13,7 @@ class App(tk.Tk):
     To add more pages, add to the tuple below
     """
     
-    PAGES = (MainMenu, NewGame)
+    PAGES = (MainMenu, NewGame, HowToPlay, EditRules, AddGame)
     
     def __init__(self):
         # make da window
