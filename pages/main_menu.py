@@ -24,7 +24,7 @@ class MainMenu(tk.Frame):
         title.pack(pady=(0, 40))
         
         button_names = [
-            ("New Game", "NewGame"),
+            ("New Game", "NewGameSetup"),
             ("How to Play", "HowToPlay"),
             ("Edit Rules", "EditRules"),
             ("Add Game", "AddGame"),
