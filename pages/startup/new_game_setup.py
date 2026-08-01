@@ -65,4 +65,7 @@ class NewGameSetup(PlaceholderPage):
         self.continue_button.config(state=state)
         
     def _on_continue(self):
-        pass
+        self.controller.shared_data["num_of_players"] = int(self.num_of_players.get())
+        self.controller.shared_data["team_breakdown"] = self.team_breakdown.get()
+        self.controller.shared_data["num_of_games"] = int(self.num_of_games.get())
+        self.controller.show_frame("NewGameTeam")

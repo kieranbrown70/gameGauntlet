@@ -2,7 +2,8 @@ import tkinter as tk
 
 from config import BG_COLOUR, WINDOW_TITLE, WINDOW_SIZE
 from pages.main_menu import MainMenu
-from pages.new_game_setup import NewGameSetup
+from pages.startup.new_game_setup import NewGameSetup
+from pages.startup.new_game_team import NewGameTeam
 from pages.how_to_play import HowToPlay
 from pages.edit_rules import EditRules
 from pages.add_game import AddGame
@@ -13,11 +14,12 @@ class App(tk.Tk):
     To add more pages, add to the tuple below
     """
     
-    PAGES = (MainMenu, NewGameSetup, HowToPlay, EditRules, AddGame)
+    PAGES = (MainMenu, NewGameSetup, NewGameTeam, HowToPlay, EditRules, AddGame)
     
     def __init__(self):
         # make da window
         super().__init__()
+        self.shared_data = {}
         self.title(WINDOW_TITLE)
         self.geometry(WINDOW_SIZE)
         self.configure(bg=BG_COLOUR)
@@ -40,4 +42,6 @@ class App(tk.Tk):
         
     def show_frame(self, page_name: str):
         frame = self.frames[page_name]
+        if hasattr(frame, "on_show"):
+            frame.on_show()
         frame.tkraise()
