@@ -132,6 +132,9 @@ class NewGameTeam(PlaceholderPage):
             self.team_names[i].get(): [s.get() for s in self.team_members[i]]
             for i in range(len(self.team_names))
         }
+        self.controller.shared_data["team_names"] = tuple(
+            team_entry.get() for team_entry in self.team_names
+        )
         self.controller.shared_data["neutral_draft"] = self.neutral_draft.get()
         self.controller.show_frame("NewGameDraft")
             

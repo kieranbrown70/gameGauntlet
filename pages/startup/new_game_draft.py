@@ -7,7 +7,8 @@ from PIL import Image, ImageTk
 
 from pages.base_page import PlaceholderPage
 from config import (
-    BG_COLOUR, FG_COLOUR, BUTTON_BG_COLOUR, BUTTON_HOVER_BG_COLOUR, BUTTON_FONT , GAME_CARD_FONT
+    BG_COLOUR, FG_COLOUR, BUTTON_BG_COLOUR, BUTTON_HOVER_BG_COLOUR, BUTTON_FONT, GAME_CARD_FONT,
+    TEAM1_COLOUR, TEAM1_HIGHLIGHT_COLOUR, TEAM2_COLOUR, TEAM2_HIGHLIGHT_COLOUR
 )
 
 class NewGameDraft(PlaceholderPage):
@@ -16,15 +17,19 @@ class NewGameDraft(PlaceholderPage):
     GRID_COLUMNS = 6
     CARD_IMAGE_SIZE = (100, 100)
     TRAY_IMAGE_SIZE = (50, 50)
+    TRAY_TEXT_WRAP = 120
     IMAGES_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "images"
     
     def build_content(self):
+        # create a label to indicate which team is drafting
+        self.turn_label = tk.Label(self.content, text="", font=BUTTON_FONT, bg=BG_COLOUR, fg=FG_COLOUR)
+        
         # setup the grid container to hold the available games
-        grid_container = tk.Frame(self.content, bg=BG_COLOUR)
-        grid_container.pack(fill="both", expand=True, pady=(0,20))
+        self.grid_container = tk.Frame(self.content, bg=BG_COLOUR)
+        self.grid_container.pack(fill="both", expand=True, pady=(0,20))
         
         # create a canvas and scrollbar to make the grid scrollable
-        self.grid_canvas = tk.Canvas(grid_container, bg=BG_COLOUR, highlightthickness=0)
+        self.grid_canvas = tk.Canvas(self.grid_container, bg=BG_COLOUR, highlightthickness=0)
         style = ttk.Style()
         style.theme_use("clam")
         style.configure(
@@ -33,7 +38,7 @@ class NewGameDraft(PlaceholderPage):
         )
 
         scrollbar = ttk.Scrollbar(
-            grid_container, orient="vertical", command=self.grid_canvas.yview,
+            self.grid_container, orient="vertical", command=self.grid_canvas.yview,
             style="Custom.Vertical.TScrollbar",
         )
         self.grid_canvas.configure(yscrollcommand=scrollbar.set)
@@ -78,6 +83,22 @@ class NewGameDraft(PlaceholderPage):
         
         self.picked = []
         self._image_cache = {}
+        
+        # determine whether it is a neutral draft or not
+        self.neutral_draft = self.controller.shared_data.get("neutral_draft", True)
+        self.team_names = self.controller.shared_data.get("team_names", ("Team 1", "Team 2"))
+ 
+        if not self.neutral_draft:
+            # split the pool as evenly as possible and assign the extra pick to team 1
+            half = self.num_games_needed // 2
+            self.team_quota = [self.num_games_needed - half, half]
+            self.team_picks = [[], []]
+            self.current_team = 0
+            self.turn_label.pack(fill="x", pady=(0, 10), before=self.grid_container)
+            self._update_turn_label()
+        else:
+            self.turn_label.pack_forget()
+        
         self._refresh_grid()
         self._refresh_selected_games()
     
@@ -129,7 +150,10 @@ class NewGameDraft(PlaceholderPage):
             return None
     
     # function to create a card for each game in the grid
-    def _make_card(self, parent, game, size, on_click):
+    def _make_card(self, parent, game, size, on_click, wraplength=None):
+        if wraplength is None:
+            wraplength = size[0]
+        
         # create a frame for the card and load the image
         card = tk.Frame(parent, bg=BUTTON_BG_COLOUR, cursor="hand2")
         photo = self._load_image(game.get("image"), size)
@@ -142,7 +166,7 @@ class NewGameDraft(PlaceholderPage):
         img_label.pack(padx=5, pady=(0, 5))
         
         # create a label for the game name and bind the click event to the card
-        name_label = tk.Label(card, text=game["name"], font=GAME_CARD_FONT, bg=BUTTON_BG_COLOUR, fg=FG_COLOUR, wraplength=size[0])
+        name_label = tk.Label(card, text=game["name"], font=GAME_CARD_FONT, bg=BUTTON_BG_COLOUR, fg=FG_COLOUR, wraplength=wraplength)
         name_label.pack(padx=5, pady=(0, 5))
         
         for widget in (card, img_label, name_label):
@@ -175,21 +199,92 @@ class NewGameDraft(PlaceholderPage):
         
         # display all the selected games in the tray
         for i, game in enumerate(self.picked):
-            card = self._make_card(self.selected_games_frame, game, self.TRAY_IMAGE_SIZE, self._unpick_game)
-            card.grid(row=0, column=i, padx=8, pady=8)
-        
+            team_index = self._team_index_for_game(game)
+            
+            # create the game card normally if it's a neutral draft
+            if team_index is None:
+                card = self._make_card(self.selected_games_frame, game, self.TRAY_IMAGE_SIZE, self._unpick_game, wraplength=self.TRAY_TEXT_WRAP)
+                card.grid(row=0, column=i, padx=8, pady=8)
+            # otherwise, add a highlight to the game card for either team
+            else:
+                highlight_colour = TEAM1_HIGHLIGHT_COLOUR if team_index == 0 else TEAM2_HIGHLIGHT_COLOUR
+                wrapper = tk.Frame(self.selected_games_frame, bg=highlight_colour)
+                card = self._make_card(wrapper, game, self.TRAY_IMAGE_SIZE, self._unpick_game, wraplength=self.TRAY_TEXT_WRAP)
+                card.pack(padx=4, pady=4)
+                wrapper.grid(row=0, column=i, padx=8, pady=8)
+                
+            
         self.start_button.config(state="normal" if len(self.picked) >= self.num_games_needed else "disabled")
         
+    # function to build the display text of the drafting team
+    def _update_turn_label(self):
+        if self.neutral_draft:
+            return
+ 
+        # determine when the team will max out in the draft
+        team_a_full = len(self.team_picks[0]) >= self.team_quota[0]
+        team_b_full = len(self.team_picks[1]) >= self.team_quota[1]
+ 
+        if team_a_full and team_b_full:
+            self.turn_label.config(text="Draft complete")
+            return
+ 
+        # update the display of the drafting team
+        team_name = self.team_names[self.current_team]
+        team_colour = TEAM1_COLOUR if self.current_team == 0 else TEAM2_COLOUR
+        if len(self.team_picks[self.current_team]) >= self.team_quota[self.current_team]:
+            self.turn_label.config(text=f"{team_name}'s draft is full", fg=team_colour)
+        else:
+            self.turn_label.config(text=f"{team_name} is picking...", fg=team_colour)
+ 
+    # function to find which team picked a given game
+    def _team_index_for_game(self, game):
+        if self.neutral_draft:
+            return None
+        for team_index, team_picks in enumerate(self.team_picks):
+            if game in team_picks:
+                return team_index
+        return None
+ 
+    # function to move to the next team's turn
+    def _advance_turn(self):
+        other_team = 1 - self.current_team
+        if len(self.team_picks[other_team]) < self.team_quota[other_team]:
+            self.current_team = other_team
+        
+    # function to pick the game and assign it to the bottom tray
     def _pick_game(self, game):
-        print(self.num_games_needed, len(self.picked))
         if len(self.picked) >= self.num_games_needed:
             return
+        
+        # add the game 
+        if not self.neutral_draft:
+            team = self.current_team
+            if len(self.team_picks[team]) >= self.team_quota[team]:
+                return
+            self.team_picks[team].append(game)
+        
         self.picked.append(game)
         self._refresh_grid()
         self._refresh_selected_games()
-        
+    
+        if not self.neutral_draft:
+            self._advance_turn()
+            self._update_turn_label()
+    
+    # function to remove the game from the bottom row
     def _unpick_game(self, game):
         self.picked.remove(game)
+        
+        if not self.neutral_draft:
+            # hand the turn back to whichever team this pick belonged to
+            for team_index, team_picks in enumerate(self.team_picks):
+                if game in team_picks:
+                    team_picks.remove(game)
+                    self.current_team = team_index
+                    break
+            self._update_turn_label()
+        
         self._refresh_grid()
         self._refresh_selected_games()
     

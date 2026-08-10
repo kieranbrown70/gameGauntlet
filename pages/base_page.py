@@ -26,7 +26,7 @@ class PlaceholderPage(tk.Frame):
             bg=BUTTON_BG_COLOUR, fg=FG_COLOUR,
             activebackground=BUTTON_HOVER_BG_COLOUR, activeforeground=FG_COLOUR,
             relief="flat", bd=0, width=4, height=1, cursor="hand2",
-            command=lambda: controller.show_frame("MainMenu"),
+            command=controller.go_back,
         )
         back_button.grid(row=0, column=2, sticky="e")
         

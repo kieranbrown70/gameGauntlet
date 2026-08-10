@@ -20,10 +20,12 @@ class App(tk.Tk):
         # make da window
         super().__init__()
         self.shared_data = {}
+        self.history = []
+        self.current_frame_name = None
         self.title(WINDOW_TITLE)
         self.geometry(WINDOW_SIZE)
         self.configure(bg=BG_COLOUR)
-        self.minsize(900, 600)
+        self.minsize(1100, 800)
         
         # creating the stack for the pages to populate to allow easy switching
         container = tk.Frame(self, bg=BG_COLOUR)
@@ -39,9 +41,23 @@ class App(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
             
         self.show_frame("MainMenu")
+    
+    # function to display the objects on the page 
+    def show_frame(self, page_name: str, add_to_history: bool = True):
+        # remember where the last page was
+        if add_to_history and self.current_frame_name is not None:
+            self.history.append(self.current_frame_name)
         
-    def show_frame(self, page_name: str):
+        self.current_frame_name = page_name
         frame = self.frames[page_name]
         if hasattr(frame, "on_show"):
             frame.on_show()
         frame.tkraise()
+        
+    # function help navigate back to the previous page that was open
+    def go_back(self):
+        if self.history:
+            previous_page = self.history.pop()
+        else:
+            previous_page = "MainMenu"
+        self.show_frame(previous_page, add_to_history=False)
