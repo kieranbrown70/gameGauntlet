@@ -10,9 +10,13 @@ Loser of a round takes a shot, but has choice of the next game.
 This continues until the win condition is met. Additional forfeit for the loser might be added.
 
 Working on:
-Basic functionality
+
+- Basic functionality
 
 To add:
-How to play page
-Editing game rules + Adding games page
-Saving statistics
+
+- How to play page
+
+- Editing game rules + Adding games page
+
+- Saving statistics
