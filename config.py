@@ -11,6 +11,7 @@ BUTTON_HOVER_BG_COLOUR = "#3d3d3d"
 TITLE_FONT = ("Consolas", 40, "bold")
 PAGE_TITLE_FONT = ("Consolas", 26, "bold")
 BUTTON_FONT = ("Consolas", 14)
+GAME_CARD_FONT = ("Consolas", 8)
 
 # window settings
 WINDOW_TITLE = "Kab's Game Gauntlet"

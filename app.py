@@ -4,9 +4,9 @@ from config import BG_COLOUR, WINDOW_TITLE, WINDOW_SIZE
 from pages.main_menu import MainMenu
 from pages.startup.new_game_setup import NewGameSetup
 from pages.startup.new_game_team import NewGameTeam
+from pages.startup.new_game_draft import NewGameDraft
 from pages.how_to_play import HowToPlay
 from pages.edit_rules import EditRules
-from pages.add_game import AddGame
 
 class App(tk.Tk):
     """
@@ -14,7 +14,7 @@ class App(tk.Tk):
     To add more pages, add to the tuple below
     """
     
-    PAGES = (MainMenu, NewGameSetup, NewGameTeam, HowToPlay, EditRules, AddGame)
+    PAGES = (MainMenu, NewGameSetup, NewGameTeam, NewGameDraft, HowToPlay, EditRules)
     
     def __init__(self):
         # make da window

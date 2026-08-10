@@ -133,7 +133,7 @@ class NewGameTeam(PlaceholderPage):
             for i in range(len(self.team_names))
         }
         self.controller.shared_data["neutral_draft"] = self.neutral_draft.get()
-        self.controller.show_frame("NextPage")  # Replace "NextPage" with the actual next page name
+        self.controller.show_frame("NewGameDraft")
             
         
         
