@@ -1,0 +1,112 @@
+[
+    {
+        "name": "NHL 11",
+        "rules": [
+            ["Even Strength Goal", 3, 1],
+            ["Shorthanded Goal", 5, 1],
+            ["5 on 3 Shorthanded Goal", 15, 2],
+            ["Hat Trick Goal", 5, 1],
+            ["Powerplay Goal", 2, 1],
+            ["Empty Net Goal", 1, 1],
+            ["Penalty Shot Goal", 2, 1],
+            ["Own Goal", 6, 0],
+            ["Fight Win", 2, 1],
+            ["Minor Penalty", 1, 0],
+            ["Major Penalty", 3, 0],
+            ["Game Misconduct", 4, 0],
+            ["Penalty Shot", 3, 0],
+            ["Game Stopping Injury Hit", 3, 1],
+            ["Icing", 1, 0],
+            ["Offside", 1, 0]
+        ]
+    },
+    {
+        "name": "FIFA 12",
+        "rules": [
+            ["Goal", 4, 1],
+            ["Hat Trick Goal", 6, 1],
+            ["Free Kick Goal", 6, 1],
+            ["Open Play Goalie Goal", 15, 2],
+            ["Own Goal", 5, 0],
+            ["Give Penalty", 3, 0],
+            ["Penalty Shot Goal", 2, 1],
+            ["Miss Wide on Penalty", 5, 0],
+            ["Penalty Save", 4, 1],
+            ["Foul", 1, 0],
+            ["Yellow Card", 2, 0],
+            ["Red Card", 4, 0],
+            ["Offside", 1, 0]
+        ]
+    },
+    {
+        "name": "Madden NFL 08",
+        "rules": [
+            ["Touchdown", 2, 1],
+            ["Extra Field Goal Point", 1, 1],
+            ["2 Point Completion", 2, 1],
+            ["0-25yd Field Goal", 1, 1],
+            ["25-50yd Field Goal", 2, 1],
+            ["50+yd Field Goal", 5, 1],
+            ["Blocked Field Goal", 4, 1],
+            ["0-25yd Field Goal", 4, 0],
+            ["25-50yd Missed Field Goal", 2, 0],
+            ["Missed 50+yd Field Goal", 1, 0],
+            ["Fake Punt/Field Goal 1st Down", 2, 1],
+            ["Kickoff/Punt Return", 4, 1],
+            ["Hail Mary Completion", 5, 1],
+            ["Fumble", 3, 0],
+            ["Interception", 2, 0],
+            ["Own Half Pick Six (60+yds)", 15, 2],
+            ["Onside Kick Recovery", 6, 1],
+            ["4th Down Turnover", 2, 0],
+            ["Touchdown From Own Half", 2, 2],
+            ["Safety", 4, 1],
+            ["Flag", 1, 0],
+            ["Timeout", 1, 0]
+        ]
+    }
+    {
+        "name": "MLB The Show 10",
+        "rules": [
+            ["Single", 1, 1],
+            ["Double", 2, 1],
+            ["Triple", 3, 1],
+            ["Home Run", 4, 1],
+            ["Inside The Park Home Run", 5, 1],
+            ["Grand Slam", 15, 2],
+            ["Run Scored", 1, 1],
+            ["Successful Bunt", 1, 1],
+            ["Stolen Base", 1, 1],
+            ["Caught Stealing/Picked Off", 2, 0],
+            ["Out", 1, 0],
+            ["Strikeout Swinging", 2, 1],
+            ["Strikeout Looking", 3, 1],
+            ["Walk", 2, 0],
+            ["Hit By Pitch", 3, 0],
+            ["Double Play", 4, 1],
+            ["Triple Play", 15, 2],
+            ["Out at Home", 2, 0]
+        ]
+    }
+    {
+        "name": "NBA 2K",
+        "rules": [
+            ["Three Pointer", 2, 1],
+            ["Dunk", 1, 1],
+            ["Lob Dunk", 1, 1],
+            ["Contact Dunk/Poster", 3, 1],
+            ["And 1", 1, 1],
+            ["Four Point Shot", 2, 1],
+            ["Half/Full Court Shot", 5, 1],
+            ["Buzzer Beater", 5, 1],
+            ["Half/Full Court Buzzer Beater", 15, 2],
+            ["Steal", 1, 1],
+            ["Block", 2, 1],
+            ["Foul", 1, 0],
+            ["Foul Out", 3, 0],
+            ["Take a Charge", 2, 1],
+            ["BLOCKED BY JAMES", 6, 1],
+            ["Timeout", 1, 0]
+        ]
+    }
+]

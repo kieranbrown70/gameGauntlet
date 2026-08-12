@@ -136,7 +136,6 @@ class NewGameDraft(PlaceholderPage):
             return self._image_cache[cache_key]
         
         full_image_path = self.IMAGES_DIR / image_path
-
         if not full_image_path.exists():
             return None
         
@@ -294,4 +293,4 @@ class NewGameDraft(PlaceholderPage):
     
     def _on_start(self):
         self.controller.shared_data["draft_pool"] = self.picked
-        self.controller.show_frame("FirstGamePageNameHere")
+        self.controller.show_frame("GameSelect")

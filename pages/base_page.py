@@ -12,13 +12,12 @@ class PlaceholderPage(tk.Frame):
         # header row to keep everything properly spaced across the top
         header = tk.Frame(self, bg=BG_COLOUR)
         header.pack(fill="x", pady=(20, 10), padx=20)
-        header.columnconfigure(0, weight=1)
-        header.columnconfigure(1, weight=1)
-        header.columnconfigure(2, weight=1)
+        header.configure(height=50)
+        header.pack_propagate(False)
         
         # set title of the page
         title = tk.Label(header, text=self.page_title, font=PAGE_TITLE_FONT, bg=BG_COLOUR, fg=FG_COLOUR)
-        title.grid(row=0, column=1)
+        title.place(relx=0.5, rely=0.5, anchor="center")
         
         # create a back button to return to the previous menu
         back_button = tk.Button(
@@ -28,7 +27,7 @@ class PlaceholderPage(tk.Frame):
             relief="flat", bd=0, width=4, height=1, cursor="hand2",
             command=controller.go_back,
         )
-        back_button.grid(row=0, column=2, sticky="e")
+        back_button.pack(side="right")
         
         # content frame to be overwritten by each page
         self.content = tk.Frame(self, bg=BG_COLOUR)
