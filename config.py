@@ -16,6 +16,7 @@ TEAM3_HIGHLIGHT_COLOUR = "#5c4f26"
 TEAM4_HIGHLIGHT_COLOUR = "#2b4a2d"
 POSITIVE_COLOUR = "#2ecc71"
 NEGATIVE_COLOUR = "#e74c3c"
+GOLD_OUTLINE_COLOUR = "#b8860b"
 
 # font and font sizes
 TITLE_FONT = ("Consolas", 40, "bold")

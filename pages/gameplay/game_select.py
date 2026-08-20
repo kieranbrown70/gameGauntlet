@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import tkinter as tk
-from tkinter import ttk
 from PIL import Image, ImageTk
 
 from pages.base_page import PlaceholderPage
@@ -11,6 +10,9 @@ from config import (
     TEAM3_COLOUR, TEAM3_HIGHLIGHT_COLOUR, TEAM4_COLOUR, TEAM4_HIGHLIGHT_COLOUR,
     POSITIVE_COLOUR, NEGATIVE_COLOUR, TEAM_HEADER_FONT, ROSTER_FONT,
 )
+
+TEAM_COLOURS           = (TEAM1_COLOUR, TEAM2_COLOUR, TEAM3_COLOUR, TEAM4_COLOUR)
+TEAM_HIGHLIGHT_COLOURS = (TEAM1_HIGHLIGHT_COLOUR, TEAM2_HIGHLIGHT_COLOUR, TEAM3_HIGHLIGHT_COLOUR, TEAM4_HIGHLIGHT_COLOUR)
 
 class GameSelect(PlaceholderPage):
     page_title = "Game Selection"
@@ -72,7 +74,7 @@ class GameSelect(PlaceholderPage):
         data.setdefault("games_played", [])
         data.setdefault("choosing_team", 0)
 
-        # make sure every player has a proper {positive, negative} entry, 
+        # make sure every player has a proper positive and negative entry
         player_stats = data.setdefault("player_stats", {})
         for name in data.get("player_names", []):
             if not isinstance(player_stats.get(name), dict):
@@ -168,8 +170,8 @@ class GameSelect(PlaceholderPage):
             
     # function to highlight the chosen game and enable the confirm button
     def _select_game(self, game, widgets):
-        highlight_colours = (TEAM1_HIGHLIGHT_COLOUR, TEAM2_HIGHLIGHT_COLOUR, TEAM3_HIGHLIGHT_COLOUR, TEAM4_HIGHLIGHT_COLOUR)
-        highlight = highlight_colours[self.current_team] if self.current_team < len(highlight_colours) else BUTTON_HOVER_BG_COLOUR
+        team_index = self.current_team if self.current_team < len(TEAM_HIGHLIGHT_COLOURS) else 0
+        highlight = TEAM_HIGHLIGHT_COLOURS[team_index]
  
         # revert the previously selected card back to normal
         if self.selected_widgets:
@@ -193,8 +195,6 @@ class GameSelect(PlaceholderPage):
         
     # function to build the roster boxes for each team along with their current stats
     def _refresh_teams(self):
-        colours = (TEAM1_COLOUR, TEAM2_COLOUR, TEAM3_COLOUR, TEAM4_COLOUR)
- 
         for widget in self.teams_frame.winfo_children():
             widget.destroy()
  
@@ -204,7 +204,7 @@ class GameSelect(PlaceholderPage):
  
         for i, team_name in enumerate(self.team_names):
             self.teams_frame.columnconfigure(i, weight=1)
-            team_colour = colours[i] if i < len(colours) else FG_COLOUR
+            team_colour = TEAM_COLOURS[i] if i < len(TEAM_COLOURS) else FG_COLOUR
  
             box = tk.Frame(self.teams_frame, bg=BUTTON_BG_COLOUR)
             box.grid(row=0, column=i, padx=10, sticky="nsew")
@@ -232,12 +232,14 @@ class GameSelect(PlaceholderPage):
     
     # function to update the label showing the round number and whose turn it is to choose
     def _update_turn_label(self):
-        colours = (TEAM1_COLOUR, TEAM2_COLOUR)
-        round_num = len(self.games_played) + 1
-        team_index = self.current_team if self.current_team < len(self.team_names) else 0
-        team_name = self.team_names[team_index]
-        team_colour = colours[team_index] if team_index < len(colours) else FG_COLOUR
-        self.turn_label.config(text=f"Round {round_num} of {self.total_rounds} \u2014 {team_name} is choosing...", fg=team_colour)
+        round_num  = len(self.games_played) + 1
+        team_index = self.current_team % len(self.team_names)
+        team_name  = self.team_names[team_index]
+        team_colour = TEAM_COLOURS[team_index] if team_index < len(TEAM_COLOURS) else FG_COLOUR
+        self.turn_label.config(
+            text=f"Round {round_num} of {self.total_rounds} \u2014 {team_name} is choosing...",
+            fg=team_colour,
+        )
 
     # TODO REMOVE FOR AN OFFICIAL END PAGE
     # function to show a wrap up state once every round has already been chosen
@@ -256,6 +258,7 @@ class GameSelect(PlaceholderPage):
         data = self.controller.shared_data
         data["games_played"].append(game)
         data["current_game"] = game
-        data["choosing_team"] = 1 - self.current_team
+        # advance choosing_team with modulo so 3- and 4-team games cycle correctly
+        data["choosing_team"] = (self.current_team + 1) % len(self.team_names)
  
-        self.controller.show_frame("PlayGamePageNameHere")
+        self.controller.show_frame("PlayGame")
