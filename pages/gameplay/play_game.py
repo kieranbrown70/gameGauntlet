@@ -6,15 +6,19 @@ import tkinter as tk
 from pages.base_page import PlaceholderPage
 from config import (
     BG_COLOUR, FG_COLOUR, BUTTON_BG_COLOUR, BUTTON_HOVER_BG_COLOUR,
-    BUTTON_FONT, PAGE_TITLE_FONT, GOLD_OUTLINE_COLOUR,
+    BUTTON_FONT, GOLD_OUTLINE_COLOUR, POSITIVE_COLOUR, NEGATIVE_COLOUR,
+    TEAM1_COLOUR, TEAM2_COLOUR, TEAM3_COLOUR, TEAM4_COLOUR,
+    TEAM_HEADER_FONT, ROSTER_FONT, RULE_FONT
 )
- 
+
 # action types
 ACTION_SELF_NEGATIVE = 0
 ACTION_NORMAL        = 1 
 ACTION_FINISH_DRINK  = 2
 
 FINISH_DRINK_VALUE = 15
+
+TEAM_COLOURS = (TEAM1_COLOUR, TEAM2_COLOUR, TEAM3_COLOUR, TEAM4_COLOUR)
 
 class PlayGame(PlaceholderPage):
     # setup the title to be overwritten and the number of columns for the actions
@@ -29,9 +33,13 @@ class PlayGame(PlaceholderPage):
         top = tk.Frame(self.content, bg=BG_COLOUR)
         top.pack(fill="both", expand=True)
         
-        # create the are for the actions to populate
+        # create the area for the actions to populate
         self.actions_frame = tk.Frame(top, bg=BG_COLOUR)
         self.actions_frame.pack(fill="both", expand=True)
+ 
+        # create player stats frame sitting below the action buttons
+        self.teams_frame = tk.Frame(top, bg=BG_COLOUR)
+        self.teams_frame.pack(fill="x", pady=(10, 0))
  
         # create the row for the point assignment and to end the game
         bottom = tk.Frame(self.content, bg=BG_COLOUR)
@@ -100,8 +108,10 @@ class PlayGame(PlaceholderPage):
         if self._title_label:
             self._title_label.config(text=game_name)
  
-        # pull player names for the dropdowns
+        # pull player/team names for the dropdowns and for the stats
         self.player_names = data.get("player_names", [])
+        self.team_names = data.get("team_names", ())
+        self.teams = data.get("teams", {})
  
         # initialise player_stats if this is the first time through
         if "player_stats" not in data:
@@ -118,12 +128,24 @@ class PlayGame(PlaceholderPage):
         self.assignment_row.pack_forget()
         self.selected_label.config(text="")
  
-        # rebuild the action columns
+        # rebuild the action columns and the team stats
         self._build_action_columns()
+        self._refresh_roster()
  
-        # populate the dropdowns
-        self._rebuild_dropdown(self.done_by_menu,  self.done_by_var,  self.player_names)
-        self._rebuild_dropdown(self.given_to_menu, self.given_to_var, self.player_names)
+        # remove any traces from a previous visit before adding a fresh one
+        for trace_id in self.done_by_var.trace_info():
+            self.done_by_var.trace_remove(trace_id[0], trace_id[1])
+ 
+        # create a quick lookup to determine who is on which team
+        self._team_lookup = {
+            player: team_name
+            for team_name, players in self.teams.items()
+            for player in players
+        }
+
+        # populate the done by field with everyone then update given to
+        self._rebuild_dropdown(self.done_by_menu, self.done_by_var, self.player_names)
+        self.done_by_var.trace_add("write", self._on_done_by_change)
     
     # function to build the columns to house the various actions
     def _build_action_columns(self):
@@ -163,13 +185,14 @@ class PlayGame(PlaceholderPage):
         # assign values from the rule given from the JSON
         name, value, action_type = rule
  
-        is_positive = action_type in (ACTION_NORMAL, ACTION_FINISH_DRINK)
- 
-        # wrapper provides the gold border for positive actions
-        if is_positive:
-            wrapper = tk.Frame(parent, bg=GOLD_OUTLINE_COLOUR, padx=2, pady=2)
-        else:
-            wrapper = tk.Frame(parent, bg=BG_COLOUR, padx=2, pady=2)
+        border_colour = {
+            ACTION_SELF_NEGATIVE: NEGATIVE_COLOUR,
+            ACTION_NORMAL:        POSITIVE_COLOUR,
+            ACTION_FINISH_DRINK:  GOLD_OUTLINE_COLOUR,
+        }.get(action_type, BG_COLOUR)
+  
+        # wrapper provides the correct colour border for the actions
+        wrapper = tk.Frame(parent, bg=border_colour, padx=2, pady=2)
         wrapper.pack(fill="x", pady=3)
  
         # build the button label which includes sip count and a marker for finish-drink
@@ -180,7 +203,7 @@ class PlayGame(PlaceholderPage):
  
         # create the button itself
         btn = tk.Button(
-            wrapper, text=display, font=BUTTON_FONT,
+            wrapper, text=display, font=RULE_FONT,
             bg=BUTTON_BG_COLOUR, fg=FG_COLOUR,
             activebackground=BUTTON_HOVER_BG_COLOUR, activeforeground=FG_COLOUR,
             relief="flat", bd=0, anchor="w", padx=10, pady=6,
@@ -274,11 +297,67 @@ class PlayGame(PlaceholderPage):
         self.selected_label.config(text=f"✓ Point given for: {name}")
         self.assignment_row.pack_forget()
         self._clear_button_highlights()
+        self._refresh_roster()
  
     # function to remove the highlight on a button
     def _clear_button_highlights(self):
         for btn, wrapper in self._action_buttons:
             btn.config(bg=BUTTON_BG_COLOUR)
+ 
+    # function to update given_to with only opponents of the selected done by player
+    def _on_done_by_change(self, *_):
+        doer = self.done_by_var.get()
+        doer_team = self._team_lookup.get(doer)
+
+        # checking which players to add to the dropdown
+        if doer_team:
+            opponents = [p for p in self.player_names if self._team_lookup.get(p) != doer_team]
+        else:
+            opponents = [p for p in self.player_names if p != doer]
+
+        self._rebuild_dropdown(self.given_to_menu, self.given_to_var, opponents)
+ 
+    # function to redraw the team roster section with current point totals
+    def _refresh_roster(self):
+        for widget in self.teams_frame.winfo_children():
+            widget.destroy()
+
+        # reset any existing column weights
+        for col in range(4):
+            self.teams_frame.columnconfigure(col, weight=0)
+
+        stats = self.controller.shared_data.get("player_stats", {})
+
+        # iterate through all of the teams
+        for i, team_name in enumerate(self.team_names):
+            # prepare formatting based on the team selected
+            self.teams_frame.columnconfigure(i, weight=1)
+            team_colour = TEAM_COLOURS[i] if i < len(TEAM_COLOURS) else FG_COLOUR
+
+            # create the frame for the team name
+            box = tk.Frame(self.teams_frame, bg=BUTTON_BG_COLOUR)
+            box.grid(row=0, column=i, padx=10, sticky="nsew")
+            tk.Label(box, text=team_name, font=TEAM_HEADER_FONT, bg=BUTTON_BG_COLOUR, fg=team_colour).pack(pady=(8, 8))
+
+            # populate the player names below the team name
+            roster = tk.Frame(box, bg=BUTTON_BG_COLOUR)
+            roster.pack(padx=15, pady=(0, 12), fill="x")
+            roster.columnconfigure(0, weight=1)
+            roster.columnconfigure(1, weight=0)
+            roster.columnconfigure(2, weight=0)
+
+            # iterate through the players on the team and display their points
+            for row, player in enumerate(self.teams.get(team_name, [])):
+                player_stats = stats.get(player, {"positive": 0, "negative": 0})
+                positive = player_stats.get("positive", 0)
+                negative = player_stats.get("negative", 0)
+
+                tk.Label(roster, text=player, font=ROSTER_FONT, bg=BUTTON_BG_COLOUR, fg=FG_COLOUR, anchor="w").grid(
+                    row=row, column=0, sticky="ew", pady=2)
+                tk.Label(roster, text=f"+{positive}", font=ROSTER_FONT, bg=BUTTON_BG_COLOUR, fg=POSITIVE_COLOUR, anchor="e").grid(
+                    row=row, column=1, sticky="e", padx=(10, 0), pady=2)
+                tk.Label(roster, text=f"-{negative}", font=ROSTER_FONT, bg=BUTTON_BG_COLOUR, fg=NEGATIVE_COLOUR, anchor="e").grid(
+                    row=row, column=2, sticky="e", padx=(6, 0), pady=2)
  
     # function to load all of the rules from the JSON file
     def _load_rules(self, game_name):

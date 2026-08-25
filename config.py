@@ -23,6 +23,7 @@ TITLE_FONT = ("Consolas", 40, "bold")
 PAGE_TITLE_FONT = ("Consolas", 26, "bold")
 BUTTON_FONT = ("Consolas", 14)
 GAME_CARD_FONT = ("Consolas", 8)
+RULE_FONT = ("Consolas", 10)
 TEAM_HEADER_FONT = ("Consolas", 16, "bold")
 ROSTER_FONT = ("Consolas", 12)
 
