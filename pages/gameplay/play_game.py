@@ -94,6 +94,28 @@ class PlayGame(PlaceholderPage):
         )
         self.end_game_button.pack(pady=(0, 4))
  
+        # winner selection row — revealed only when the end game button is clicked
+        self.winner_row = tk.Frame(bottom, bg=BG_COLOUR)
+
+        # create the frame for the winner selection
+        winner_label_frame = tk.Frame(self.winner_row, bg=BG_COLOUR)
+        winner_label_frame.pack(side="left", padx=(0, 20))
+        tk.Label(winner_label_frame, text="Who won?", font=BUTTON_FONT, bg=BG_COLOUR, fg=FG_COLOUR).pack(anchor="w")
+        self.winner_var = tk.StringVar(value="Select...")
+        self.winner_menu = tk.OptionMenu(winner_label_frame, self.winner_var, "Select...")
+        self._style_menu(self.winner_menu)
+        self.winner_menu.pack()
+
+        # create a button to confirm the winner
+        self.confirm_winner_button = tk.Button(
+            self.winner_row, text="Confirm", font=BUTTON_FONT,
+            bg=BUTTON_BG_COLOUR, fg=FG_COLOUR,
+            activebackground=BUTTON_HOVER_BG_COLOUR, activeforeground=FG_COLOUR,
+            relief="flat", bd=0, height=2, padx=16, cursor="hand2",
+            command=self._on_confirm_winner,
+        )
+        self.confirm_winner_button.pack(side="left")
+ 
         # internal state
         self._selected_action = None
         self._action_buttons  = []
@@ -112,7 +134,14 @@ class PlayGame(PlaceholderPage):
         self.player_names = data.get("player_names", [])
         self.team_names = data.get("team_names", ())
         self.teams = data.get("teams", {})
- 
+
+        # populate the winner dropdown with the current team names
+        self._rebuild_team_dropdown(
+            self.winner_menu,
+            self.winner_var,
+            self.team_names
+        )
+        
         # initialise player_stats if this is the first time through
         if "player_stats" not in data:
             data["player_stats"] = {}
@@ -120,18 +149,25 @@ class PlayGame(PlaceholderPage):
             if name not in data["player_stats"] or not isinstance(data["player_stats"][name], dict):
                 data["player_stats"][name] = {"positive": 0, "negative": 0}
  
+        # take a snapshot of the points at the beginning to calculate the stats at the end
+        data["round_stats_snapshot"] = { 
+            name: dict(stats) 
+            for name, stats in data["player_stats"].items()
+        }
+ 
         # load the rules for this game
         self._rules = self._load_rules(game_name)
  
         # reset selection state
         self._selected_action = None
         self.assignment_row.pack_forget()
+        self.winner_row.pack_forget()
         self.selected_label.config(text="")
  
         # rebuild the action columns and the team stats
         self._build_action_columns()
         self._refresh_roster()
- 
+
         # remove any traces from a previous visit before adding a fresh one
         for trace_id in self.done_by_var.trace_info():
             self.done_by_var.trace_remove(trace_id[0], trace_id[1])
@@ -398,8 +434,32 @@ class PlayGame(PlaceholderPage):
                         return grandchild
         return None
  
-    # function to end the current game and to go to a stats screen
-    # TODO: Implement this shi
+    # function to reveal the winner selection row when the end game button is clicked
     def _on_end_game(self):
-        self.controller.show_frame("StatScreen")
+        if not self.winner_row.winfo_ismapped():
+            self.winner_row.pack(pady=(8, 0))
+
+    # function to record the chosen winner and navigate to the next page
+    def _on_confirm_winner(self):
+        winner = self.winner_var.get()
+        team_names = self.controller.shared_data.get("team_names", ())
+        if winner not in team_names:
+            return
+
+        data = self.controller.shared_data
+        data["round_winner"] = winner
+
+        # update the per-team game-win counter
+        game_wins = data.setdefault("game_wins", {t: 0 for t in team_names})
+        game_wins[winner] = game_wins.get(winner, 0) + 1
+
+        self.controller.show_frame("GameResults")
+
+    # function to populate a team-name dropdown
+    def _rebuild_team_dropdown(self, menu, var, team_names):
+        dropdown = menu["menu"]
+        dropdown.delete(0, "end")
+        for name in team_names:
+            dropdown.add_command(label=name, command=lambda v=name: var.set(v))
+        var.set(team_names[0] if team_names else "Select...")
     
