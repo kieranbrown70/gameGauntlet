@@ -52,12 +52,7 @@ class GameResults(PlaceholderPage):
 
         # round deltas to show how much each player moved this round
         self.round_deltas = {
-            name: {
-                "positive": self.player_stats.get(name, {}).get("positive", 0)
-                            - self.snapshot.get(name, {}).get("positive", 0),
-                "negative": self.player_stats.get(name, {}).get("negative", 0)
-                            - self.snapshot.get(name, {}).get("negative", 0),
-            }
+            name: dict(self.snapshot.get(name, {"positive": 0, "negative": 0}))
             for name in data.get("player_names", [])
         }
 
@@ -79,34 +74,39 @@ class GameResults(PlaceholderPage):
             widget.destroy()
 
         # yo he giving top bru no shot
-        top_giver    = self._player_with_most("positive")
-        top_receiver = self._player_with_most("negative")
+        top_givers, giver_pts = self._players_with_most("positive")
+        top_receivers, receiver_pts = self._players_with_most("negative")
 
-        if top_giver:
-            pts = self.round_deltas[top_giver]["positive"]
+        # display the player(s) that gave out the most points
+        if top_givers:
+            names = " & ".join(top_givers)
+            verb  = "gave out" if len(top_givers) == 1 else "both gave out"
             tk.Label(
                 self.facts_frame,
-                text=f"{top_giver} gave out the most points this round with +{pts}",
+                text=f"{names} {verb} the most points this round with +{giver_pts}",
                 font=ROSTER_FONT, bg=BG_COLOUR, fg=POSITIVE_COLOUR,
-            ).pack(anchor="w", pady=2)
+            ).pack(pady=2)
 
-        if top_receiver:
-            pts = self.round_deltas[top_receiver]["negative"]
+        # display the player(s) that received the most points
+        if top_receivers:
+            names = " & ".join(top_receivers)
+            verb  = "received" if len(top_receivers) == 1 else "both received"
             tk.Label(
                 self.facts_frame,
-                text=f"{top_receiver} received the most points this round with -{pts}",
+                text=f"{names} {verb} the most points this round with -{receiver_pts}",
                 font=ROSTER_FONT, bg=BG_COLOUR, fg=NEGATIVE_COLOUR,
-            ).pack(anchor="w", pady=2)
+            ).pack(pady=2)
 
     # function to find the player with the highest delta for a given stat key
-    def _player_with_most(self, key):
-        best_name  = None
-        best_value = -1
-        for name, delta in self.round_deltas.items():
+    def _players_with_most(self, key):
+        best_value = 0
+        for delta in self.round_deltas.values():
             if delta[key] > best_value:
                 best_value = delta[key]
-                best_name  = name
-        return best_name
+        if best_value == 0:
+            return [], 0
+        names = [n for n, d in self.round_deltas.items() if d[key] == best_value]
+        return names, best_value
 
     # function to build the team roster cards showing this round's deltas
     def _refresh_teams(self):

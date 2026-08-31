@@ -149,11 +149,8 @@ class PlayGame(PlaceholderPage):
             if name not in data["player_stats"] or not isinstance(data["player_stats"][name], dict):
                 data["player_stats"][name] = {"positive": 0, "negative": 0}
  
-        # take a snapshot of the points at the beginning to calculate the stats at the end
-        data["round_stats_snapshot"] = { 
-            name: dict(stats) 
-            for name, stats in data["player_stats"].items()
-        }
+        # track only this round's activity by starting at 0
+        self._round_stats = {name: {"positive": 0, "negative": 0} for name in self.player_names}
  
         # load the rules for this game
         self._rules = self._load_rules(game_name)
@@ -305,8 +302,7 @@ class PlayGame(PlaceholderPage):
         doer = self.done_by_var.get()
         receiver = self.given_to_var.get()
  
-        data = self.controller.shared_data
-        stats = data["player_stats"]
+        stats = self._round_stats
  
         # make sure doer is a real player
         if doer not in stats:
@@ -362,7 +358,7 @@ class PlayGame(PlaceholderPage):
         for col in range(4):
             self.teams_frame.columnconfigure(col, weight=0)
 
-        stats = self.controller.shared_data.get("player_stats", {})
+        stats = self._round_stats
 
         # iterate through all of the teams
         for i, team_name in enumerate(self.team_names):
@@ -447,11 +443,27 @@ class PlayGame(PlaceholderPage):
             return
 
         data = self.controller.shared_data
+
+        # capture the round stats for game results page to display
+        data["round_stats_snapshot"] = self._round_stats
+
+        # flush round stats into the cumulative totals
+        cumulative = data.setdefault("player_stats", {})
+        for name, delta in self._round_stats.items():
+            if name not in cumulative or not isinstance(cumulative[name], dict):
+                cumulative[name] = {"positive": 0, "negative": 0}
+            cumulative[name]["positive"] += delta["positive"]
+            cumulative[name]["negative"] += delta["negative"]
+
         data["round_winner"] = winner
 
         # update the per-team game-win counter
         game_wins = data.setdefault("game_wins", {t: 0 for t in team_names})
         game_wins[winner] = game_wins.get(winner, 0) + 1
+
+        # append this result to the running round log for game over to display
+        game_name = data.get("current_game", {}).get("name", "Unknown")
+        data.setdefault("round_results", []).append({"game": game_name, "winner": winner})
 
         self.controller.show_frame("GameResults")
 
