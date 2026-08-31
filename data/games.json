@@ -27,6 +27,7 @@
         "name": "FIFA 12",
         "image": "fifa12.jpg",
         "platform": "PS3",
+        "game_format": ["1v1", "2v2"],
         "rules": [
             ["Goal", 4, 1],
             ["Hat Trick Goal", 6, 1],
@@ -47,6 +48,7 @@
         "name": "Madden NFL 08",
         "image": "madden08.jpg",
         "platform": "PS3",
+        "game_format": ["1v1", "2v2"],
         "rules": [
             ["Touchdown", 2, 1],
             ["Touchdown From Own Half", 2, 1],
@@ -76,6 +78,7 @@
         "name": "MLB the Show 10",
         "image": "mlb10.jpg",
         "platform": "PS3",
+        "game_format": ["1v1", "2v2"],
         "rules": [
             ["Single", 1, 1],
             ["Double", 2, 1],
@@ -102,6 +105,7 @@
         "name": "NBA 2K",
         "image": "default.jpg",
         "platform": "PS3",
+        "game_format": ["1v1", "2v2"],
         "rules": [
             ["Three Pointer", 2, 1],
             ["Dunk", 1, 1],
@@ -123,77 +127,94 @@
     },
     {
         "name": "Super Smash Bros. Ultimate",
-        "image": "ssbultimate.jpg"
+        "image": "ssbultimate.jpg",
+        "platform": "Switch",
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
     },
     {
         "name": "Trivial Pursuit",
         "image": "trivialpursuit.jpg",
-        "platform": "PS3"
+        "platform": "PS3",
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
     },
     {
         "name": "Trivial Pursuit Live 2",
         "image": "trivialpursuitlive2.jpg",
-        "platform": "Switch"
+        "platform": "Switch",
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
     },
     {
         "name": "Mario Kart 8 Deluxe",
         "image": "mariokart8.jpg",
-        "platform": "Switch"
+        "platform": "Switch",
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
     },
     {
         "name": "Family Feud",
         "image": "familyfeud.jpg",
-        "platform": "Switch"
+        "platform": "Switch",
+        "game_format": ["1v1", "2v2"]
     },
     {
         "name": "Peggle",
         "image": "peggle.jpg",
-        "platform": "PS3"
+        "platform": "PS3",
+        "game_format": ["1v1", "2v2"]
     },
     {
         "name": "Catan",
         "image": "catan.jpg",
-        "platform": "IRL"
+        "platform": "IRL",
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
     },
     {
         "name": "COD: Black Ops",
         "image": "codblackops.jpg",
-        "platform": "PS3"
+        "platform": "PS3",
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
     },
     {
         "name": "Mario Strikers: Battle League",
         "image": "mariostrikers.jpg",
-        "platform": "Switch"
+        "platform": "Switch",
+        "game_format": ["1v1", "2v2"]
     },
     {
         "name": "Wii Sports Tennis",
         "image": "wiisports.jpg",
-        "platform": "Wii"
+        "platform": "Wii",
+        "game_format": ["1v1", "2v2"]
     },
     {
         "name": "Wii Sports Baseball",
         "image": "wiisports.jpg",
-        "platform": "Wii"
+        "platform": "Wii",
+        "game_format": ["1v1"]
     },
     {
         "name": "Wii Sports Bowling",
         "image": "wiisports.jpg",
-        "platform": "Wii"
+        "platform": "Wii",
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
+
     },
     {
         "name": "Wii Sports Golf",
         "image": "wiisports.jpg",
-        "platform": "Wii"
+        "platform": "Wii",
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
     },
     {
         "name": "Wii Sports Boxing",
         "image": "wiisports.jpg",
-        "platform": "Wii"
+        "platform": "Wii",
+        "game_format": ["1v1"]
     },
     {
         "name": "Mario Super Sluggers",
         "image": "mariosupersluggers.jpg",
-        "platform": "Wii"
+        "platform": "Wii",
+        "game_format": ["1v1", "2v2"]
     }
 ]
 

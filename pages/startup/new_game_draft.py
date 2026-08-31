@@ -1,4 +1,5 @@
 import json
+import random
 from pathlib import Path
 
 import tkinter as tk
@@ -7,9 +8,13 @@ from PIL import Image, ImageTk
 
 from pages.base_page import PlaceholderPage
 from config import (
-    BG_COLOUR, FG_COLOUR, BUTTON_BG_COLOUR, BUTTON_HOVER_BG_COLOUR, BUTTON_FONT, GAME_CARD_FONT,
-    TEAM1_COLOUR, TEAM1_HIGHLIGHT_COLOUR, TEAM2_COLOUR, TEAM2_HIGHLIGHT_COLOUR
+    BG_COLOUR, FG_COLOUR, BUTTON_BG_COLOUR, BUTTON_HOVER_BG_COLOUR, BUTTON_FONT, GAME_CARD_FONT, ROSTER_FONT,
+    TEAM1_COLOUR, TEAM1_HIGHLIGHT_COLOUR, TEAM2_COLOUR, TEAM2_HIGHLIGHT_COLOUR,
+    TEAM3_COLOUR, TEAM3_HIGHLIGHT_COLOUR, TEAM4_COLOUR, TEAM4_HIGHLIGHT_COLOUR
 )
+
+TEAM_COLOURS = (TEAM1_COLOUR, TEAM2_COLOUR, TEAM3_COLOUR, TEAM4_COLOUR)
+TEAM_HIGHLIGHT_COLOURS = (TEAM1_HIGHLIGHT_COLOUR, TEAM2_HIGHLIGHT_COLOUR, TEAM3_HIGHLIGHT_COLOUR, TEAM4_HIGHLIGHT_COLOUR)
 
 class NewGameDraft(PlaceholderPage):
     page_title = "Game Draft"
@@ -23,6 +28,9 @@ class NewGameDraft(PlaceholderPage):
     def build_content(self):
         # create a label to indicate which team is drafting
         self.turn_label = tk.Label(self.content, text="", font=BUTTON_FONT, bg=BG_COLOUR, fg=FG_COLOUR)
+
+        # create a row of coloured team name labels to show the full draft order
+        self.order_row = tk.Frame(self.content, bg=BG_COLOUR)
         
         # setup the grid container to hold the available games
         self.grid_container = tk.Frame(self.content, bg=BG_COLOUR)
@@ -89,15 +97,32 @@ class NewGameDraft(PlaceholderPage):
         self.team_names = self.controller.shared_data.get("team_names", ("Team 1", "Team 2"))
  
         if not self.neutral_draft:
-            # split the pool as evenly as possible and assign the extra pick to team 1
-            half = self.num_games_needed // 2
-            self.team_quota = [self.num_games_needed - half, half]
-            self.team_picks = [[], []]
-            self.current_team = 0
+            num_teams = len(self.team_names)
+
+            # randomize the draft order
+            self.draft_order = list(range(num_teams))
+            random.shuffle(self.draft_order)
+
+            # distribute all the picks for the draft leaving the leftovers for the earlier teams
+            base, rem = divmod(self.num_games_needed, num_teams)
+            self.team_quota = [0] * num_teams
+            for i, team_idx in enumerate(self.draft_order):
+                self.team_quota[team_idx] = base + (1 if i < rem else 0)
+            self.team_picks = [[] for _ in range(num_teams)]
+
+            # the team that picks last in the draft gets first choice when playing
+            self.controller.shared_data["choosing_team"] = self.draft_order[-1]
+
+            # index the current position of the draft
+            self.draft_pos = 0
+            self.current_team = self.draft_order[self.draft_pos]
             self.turn_label.pack(fill="x", pady=(0, 10), before=self.grid_container)
+            self.order_row.pack(pady=(0, 10), before=self.grid_container)
             self._update_turn_label()
+            self._update_order_row()
         else:
             self.turn_label.pack_forget()
+            self.order_row.pack_forget()
         
         self._refresh_grid()
         self._refresh_selected_games()
@@ -206,7 +231,7 @@ class NewGameDraft(PlaceholderPage):
                 card.grid(row=0, column=i, padx=8, pady=8)
             # otherwise, add a highlight to the game card for either team
             else:
-                highlight_colour = TEAM1_HIGHLIGHT_COLOUR if team_index == 0 else TEAM2_HIGHLIGHT_COLOUR
+                highlight_colour = TEAM_HIGHLIGHT_COLOURS[team_index] if team_index < len(TEAM_HIGHLIGHT_COLOURS) else BUTTON_BG_COLOUR
                 wrapper = tk.Frame(self.selected_games_frame, bg=highlight_colour)
                 card = self._make_card(wrapper, game, self.TRAY_IMAGE_SIZE, self._unpick_game, wraplength=self.TRAY_TEXT_WRAP)
                 card.pack(padx=4, pady=4)
@@ -220,21 +245,44 @@ class NewGameDraft(PlaceholderPage):
         if self.neutral_draft:
             return
  
-        # determine when the team will max out in the draft
-        team_a_full = len(self.team_picks[0]) >= self.team_quota[0]
-        team_b_full = len(self.team_picks[1]) >= self.team_quota[1]
- 
-        if team_a_full and team_b_full:
-            self.turn_label.config(text="Draft complete")
+        # check if every team has hit their quota
+        if all(len(self.team_picks[i]) >= self.team_quota[i] for i in range(len(self.team_names))):
+            self.turn_label.config(text="Draft complete", fg=FG_COLOUR)
             return
  
         # update the display of the drafting team
         team_name = self.team_names[self.current_team]
-        team_colour = TEAM1_COLOUR if self.current_team == 0 else TEAM2_COLOUR
+        team_colour = TEAM_COLOURS[self.current_team] if self.current_team < len(TEAM_COLOURS) else FG_COLOUR
         if len(self.team_picks[self.current_team]) >= self.team_quota[self.current_team]:
             self.turn_label.config(text=f"{team_name}'s draft is full", fg=team_colour)
         else:
             self.turn_label.config(text=f"{team_name} is picking...", fg=team_colour)
+
+     # function to rebuild the coloured draft order indicator
+    def _update_order_row(self):
+        for widget in self.order_row.winfo_children():
+            widget.destroy()
+
+        # iterate through each of the teams to the draft order status
+        for pos, team_idx in enumerate(self.draft_order):
+            team_name = self.team_names[team_idx]
+            team_colour = TEAM_COLOURS[team_idx] if team_idx < len(TEAM_COLOURS) else FG_COLOUR
+
+            # dim the colour if the team is done drafting
+            is_done = len(self.team_picks[team_idx]) >= self.team_quota[team_idx]
+            label_colour = BUTTON_BG_COLOUR if is_done else team_colour
+
+            tk.Label(
+                self.order_row, text=team_name, font=ROSTER_FONT,
+                bg=BG_COLOUR, fg=label_colour,
+            ).pack(side="left")
+
+            # add an arrow between entries but not after the last one
+            if pos < len(self.draft_order) - 1:
+                tk.Label(
+                    self.order_row, text="  →  ", font=ROSTER_FONT,
+                    bg=BG_COLOUR, fg=FG_COLOUR,
+                ).pack(side="left")
  
     # function to find which team picked a given game
     def _team_index_for_game(self, game):
@@ -247,9 +295,14 @@ class NewGameDraft(PlaceholderPage):
  
     # function to move to the next team's turn
     def _advance_turn(self):
-        other_team = 1 - self.current_team
-        if len(self.team_picks[other_team]) < self.team_quota[other_team]:
-            self.current_team = other_team
+        num_teams = len(self.team_names)
+        # step forward through the draft order
+        for step in range(1, num_teams + 1):
+            self.draft_pos = (self.draft_pos + 1) % num_teams
+            candidate = self.draft_order[self.draft_pos]
+            if len(self.team_picks[candidate]) < self.team_quota[candidate]:
+                self.current_team = candidate
+                return
         
     # function to pick the game and assign it to the bottom tray
     def _pick_game(self, game):
@@ -270,19 +323,23 @@ class NewGameDraft(PlaceholderPage):
         if not self.neutral_draft:
             self._advance_turn()
             self._update_turn_label()
+            self._update_order_row()
     
     # function to remove the game from the bottom row
     def _unpick_game(self, game):
         self.picked.remove(game)
         
         if not self.neutral_draft:
-            # hand the turn back to whichever team this pick belonged to
+            # find which team owned this pick, restore it and rewind the draft position to match
             for team_index, team_picks in enumerate(self.team_picks):
                 if game in team_picks:
                     team_picks.remove(game)
                     self.current_team = team_index
+                    # rewind the draft position so it points back to the correct team
+                    self.draft_pos = self.draft_order.index(team_index)
                     break
             self._update_turn_label()
+            self._update_order_row()
         
         self._refresh_grid()
         self._refresh_selected_games()
