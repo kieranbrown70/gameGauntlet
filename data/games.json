@@ -8,6 +8,7 @@
             ["Even Strength Goal", 3, 1],
             ["Shorthanded Goal", 5, 1],
             ["Hat Trick Goal", 5, 1],
+            ["Game Winning Goal", 6, 1],
             ["Powerplay Goal", 2, 1],
             ["Empty Net Goal", 1, 1],
             ["Penalty Shot Goal", 2, 1],
@@ -31,6 +32,7 @@
         "rules": [
             ["Goal", 4, 1],
             ["Hat Trick Goal", 6, 1],
+            ["Extra Time Goal", 5, 1],
             ["Free Kick Goal", 6, 1],
             ["Penalty Save", 4, 1],
             ["Penalty Shot Goal", 2, 1],
@@ -86,6 +88,7 @@
             ["Home Run", 4, 1],
             ["Inside The Park Home Run", 5, 1],
             ["Run Scored", 1, 1],
+            ["Extra Innings Run Scored", 3, 1],
             ["Successful Bunt", 1, 1],
             ["Stolen Base", 1, 1],
             ["Strikeout Swinging", 2, 1],
@@ -215,6 +218,24 @@
         "image": "mariosupersluggers.jpg",
         "platform": "Wii",
         "game_format": ["1v1", "2v2"]
+    },
+    {
+        "name": "The Price is Right: Decades",
+        "image": "priceisright.jpg",
+        "platform": "PS3",
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
+    },
+    {
+        "name": "Hot Shots Golf World Invitational",
+        "image": "hotshotsgolf6.jpg",
+        "platform": "PS3",
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
+    },
+    {
+        "name": "ModNation Racers",
+        "image": "modnationracers.jpg",
+        "platform": "PS3",
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
     }
 ]
 
