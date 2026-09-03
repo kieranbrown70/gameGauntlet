@@ -1,4 +1,5 @@
 import json
+import math
 from pathlib import Path
  
 import tkinter as tk
@@ -134,7 +135,9 @@ class PlayGame(PlaceholderPage):
         self.player_names = data.get("player_names", [])
         self.team_names = data.get("team_names", ())
         self.teams = data.get("teams", {})
-
+        self.game_wins = data.get("game_wins", {})
+        self.wins_needed = data.get("wins_needed") or math.ceil(len(data.get("draft_pool", [])) / 2)
+        
         # populate the winner dropdown with the current team names
         self._rebuild_team_dropdown(
             self.winner_menu,
@@ -366,10 +369,13 @@ class PlayGame(PlaceholderPage):
             self.teams_frame.columnconfigure(i, weight=1)
             team_colour = TEAM_COLOURS[i] if i < len(TEAM_COLOURS) else FG_COLOUR
 
+            wins = self.game_wins.get(team_name, 0)
+            header_text = f"{team_name}  ({wins}/{self.wins_needed})"
+
             # create the frame for the team name
             box = tk.Frame(self.teams_frame, bg=BUTTON_BG_COLOUR)
             box.grid(row=0, column=i, padx=10, sticky="nsew")
-            tk.Label(box, text=team_name, font=TEAM_HEADER_FONT, bg=BUTTON_BG_COLOUR, fg=team_colour).pack(pady=(8, 8))
+            tk.Label(box, text=header_text, font=TEAM_HEADER_FONT, bg=BUTTON_BG_COLOUR, fg=team_colour).pack(pady=(8, 8))
 
             # populate the player names below the team name
             roster = tk.Frame(box, bg=BUTTON_BG_COLOUR)

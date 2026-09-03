@@ -105,8 +105,8 @@
         ]
     },
     {
-        "name": "NBA 2K",
-        "image": "default.jpg",
+        "name": "NBA 2K15",
+        "image": "nba2k15.jpg",
         "platform": "PS3",
         "game_format": ["1v1", "2v2"],
         "rules": [
@@ -132,13 +132,35 @@
         "name": "Super Smash Bros. Ultimate",
         "image": "ssbultimate.jpg",
         "platform": "Switch",
-        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"],
+        "rules": [
+            ["KO", 1, 1],
+            ["Final Smash KO", 1, 1],
+            ["Spike Kill", 2, 1],
+            ["Suicide Kill", 1, 1],
+            ["2 Stock Win", 3, 1],
+            ["500+ Dmg", 3, 1],
+            ["How Did You Die To That?", 3, 0],
+            ["Shield Broken", 2, 0],
+            ["SD", 2, 0],
+            ["0 KOs", 3, 0],
+            ["3 Stock Win", 15, 2]
+        ]
     },
     {
         "name": "Trivial Pursuit",
         "image": "trivialpursuit.jpg",
         "platform": "PS3",
-        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"],
+        "rules": [
+            ["Earned A Wedge", 2, 1],
+            ["Get 3 Questions in a Row", 2, 1],
+            ["Get 5 Questions in a Row", 5, 1],
+            ["Get a Question Wrong", 1, 0],
+            ["Get 3 Questions Wrond in a Row", 3, 0],
+            ["Get 5 Questions Wrong in a Row", 5, 0],
+            ["Get 3 Wedges in a Turn", 15, 2]
+        ]
     },
     {
         "name": "Trivial Pursuit Live 2",
@@ -150,13 +172,33 @@
         "name": "Mario Kart 8 Deluxe",
         "image": "mariokart8.jpg",
         "platform": "Switch",
-        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"],
+        "rules": [
+            ["Win A Race", 3, 1],
+            ["Podium Result", 2, 1],
+            ["Top 6 Result", 1, 1],
+            ["Winning Player(s) Ahead By 5+ Places", 3, 1],
+            ["Get Hit/Out of Bounds", 1, 0],
+            ["Blue Shelled", 2, 0],
+            ["Perfect Grand Prix (4 Wins)", 15, 2]
+        ]
     },
     {
         "name": "Family Feud",
         "image": "familyfeud.jpg",
         "platform": "Switch",
-        "game_format": ["1v1", "2v2"]
+        "game_format": ["1v1", "2v2"],
+        "rules": [
+            ["Win A Round", 2, 1],
+            ["Clear The Board", 2, 1],
+            ["Steal The Board", 1, 1],
+            ["Win Fast Money", 4, 1],
+            ["Strike", 1, 0],
+            ["0 Point Fast Money Answer", 2, 0],
+            ["Pass A Round", 3, 0],
+            ["Instant 3 Strikes", 5, 0],
+            ["Get Swept + Win Fast Money", 15, 2]
+        ]
     },
     {
         "name": "Peggle",
@@ -174,13 +216,33 @@
         "name": "COD: Black Ops",
         "image": "codblackops.jpg",
         "platform": "PS3",
-        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"],
+        "rules": [
+            ["Win A Game", 3, 1],
+            ["5+ Kills", 1, 1],
+            ["10+ Kills", 3, 1],
+            ["15+ Kills", 5, 1],
+            ["No Scope Snipe", 5, 1],
+            ["Knife Kill", 3, 1],
+            ["Suicide", 4, 0],
+            ["Perfect Game (NO CAMPING)", 15, 2],
+            ["Crossmap Tomahawk", 15, 2]
+        ]
     },
     {
         "name": "Mario Strikers: Battle League",
         "image": "mariostrikers.jpg",
         "platform": "Switch",
-        "game_format": ["1v1", "2v2"]
+        "game_format": ["1v1", "2v2"],
+        "rules": [
+            ["Goal", 3, 1],
+            ["Hat Trick Goal", 5, 1],
+            ["Extra Time Goal", 5, 1],
+            ["Special Charge Goal", 4, 1],
+            ["Item The Ball Carrier", 1, 1],
+            ["Special Shot Saved", 2, 0],
+            ["Get Brazil'd", 15, 2]
+        ]
     },
     {
         "name": "Wii Sports Tennis",
@@ -229,7 +291,22 @@
         "name": "Hot Shots Golf World Invitational",
         "image": "hotshotsgolf6.jpg",
         "platform": "PS3",
-        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"]
+        "game_format": ["1v1", "1v1v1", "2v2", "1v1v1v1"],
+        "rules": [
+            ["Birdie", 2, 1],
+            ["Eagle", 5, 1],
+            ["Long Putt 20+ ft", 2, 1],
+            ["Chip in", 3, 1],
+            ["Bogey", 1, 0],
+            ["Double Bogey", 2, 0],
+            ["Triple Bogey", 3, 0],
+            ["Quad Bogey or More", 4, 0],
+            ["Rough", 1, 0],
+            ["Bunker", 2, 0],
+            ["OB", 3, 0],
+            ["Missed 5ft or Less Putt", 2, 0],
+            ["Hole in One", 15, 2]
+        ]
     },
     {
         "name": "ModNation Racers",

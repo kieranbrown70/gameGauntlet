@@ -1,3 +1,4 @@
+import math
 import tkinter as tk
 
 from pages.base_page import PlaceholderPage
@@ -9,6 +10,13 @@ PLAYERS_TO_TEAMS = {
     "2": ["1v1"],
     "3": ["1v1v1"],
     "4": ["2v2", "1v1v1v1"],
+}
+
+TEAM_BREAKDOWN_GAMES = {
+    "1v1":     ["3", "5", "7"],
+    "2v2":     ["3", "5", "7"],
+    "1v1v1":   ["4", "7"],
+    "1v1v1v1": ["5", "9"],
 }
 
 TEAMS_TO_PLAYERS = {
@@ -24,11 +32,22 @@ DEFAULT_TEAM_FOR_PLAYERS = {
     "4": "2v2",
 }
 
+WINS_NEEDED_TABLE = {
+    ("1v1v1", 4): 2,
+    ("1v1v1", 7): 3,
+    ("1v1v1v1", 5): 2,
+    ("1v1v1v1", 9): 3,
+}
+
+# function to determine the number of wins needed to win the whole game
+def _wins_needed(breakdown, num_games):
+    return WINS_NEEDED_TABLE.get((breakdown, num_games), math.ceil(num_games / 2))
+
 class NewGameSetup(PlaceholderPage):
     page_title = "New Game Setup"
     
     def build_content(self):
-        # create two columns to seperate the settings
+        # create two columns to separate the settings
         self.content.columnconfigure(0, weight=1)
         self.content.columnconfigure(1, weight=1)
         
@@ -56,9 +75,9 @@ class NewGameSetup(PlaceholderPage):
         
         tk.Label(right, text="Number of Games", font=BUTTON_FONT, bg=BG_COLOUR, fg=FG_COLOUR).pack(pady=(0, 5), anchor="w")
         self.num_of_games = tk.StringVar(value="Select...")
-        games_menu = tk.OptionMenu(right, self.num_of_games, "3", "5", "7", command=self._on_selection_change)
-        self._style_menu(games_menu)
-        games_menu.pack(pady=(0, 20), fill="x")
+        self.games_menu = tk.OptionMenu(right, self.num_of_games, "3", "5", "7", command=self._on_selection_change)
+        self._style_menu(self.games_menu)
+        self.games_menu.pack(pady=(0, 20), fill="x")
         
         self.continue_button = tk.Button(
             right, text="Continue", font=BUTTON_FONT,
@@ -105,6 +124,7 @@ class NewGameSetup(PlaceholderPage):
         if self.team_breakdown.get() not in valid_teams:
             self.team_breakdown.set(DEFAULT_TEAM_FOR_PLAYERS[players])
         
+        self._sync_games_options()
         self._syncing = False
         self._on_selection_change()
         
@@ -122,8 +142,17 @@ class NewGameSetup(PlaceholderPage):
         self._rebuild_menu(self.teams_menu, self.team_breakdown, valid_teams, self._on_teams_change)
         self.team_breakdown.set(teams)
         
+        self._sync_games_options()
         self._syncing = False
         self._on_selection_change()
+        
+    # function to rebuild the games options based on the current team breakdown
+    def _sync_games_options(self):
+        breakdown = self.team_breakdown.get()
+        valid_games = TEAM_BREAKDOWN_GAMES.get(breakdown, ["3", "5", "7"])
+        self._rebuild_menu(self.games_menu, self.num_of_games, valid_games, self._on_selection_change)
+        if self.num_of_games.get() not in valid_games:
+            self.num_of_games.set("Select...")
     
     # function to handle the changes in setting selection
     def _on_selection_change(self, _=None):
@@ -133,7 +162,11 @@ class NewGameSetup(PlaceholderPage):
         self.continue_button.config(state=state)
         
     def _on_continue(self):
+        breakdown = self.team_breakdown.get()
+        num_games = int(self.num_of_games.get())
+
         self.controller.shared_data["num_of_players"] = int(self.num_of_players.get())
-        self.controller.shared_data["team_breakdown"] = self.team_breakdown.get()
-        self.controller.shared_data["num_of_games"] = int(self.num_of_games.get())
+        self.controller.shared_data["team_breakdown"] = breakdown
+        self.controller.shared_data["num_of_games"] = num_games
+        self.controller.shared_data["wins_needed"] = _wins_needed(breakdown, num_games)
         self.controller.show_frame("NewGameTeam")

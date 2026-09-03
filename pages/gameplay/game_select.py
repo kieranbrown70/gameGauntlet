@@ -1,3 +1,4 @@
+import math
 from pathlib import Path
 
 import tkinter as tk
@@ -83,7 +84,9 @@ class GameSelect(PlaceholderPage):
         self.games_played = data["games_played"]
         self.current_team = data["choosing_team"]
         self.player_stats = data["player_stats"]
+        self.game_wins = data.get("game_wins", {})
         self.total_rounds = data.get("num_of_games", len(self.draft_pool))
+        self.wins_needed = data.get("wins_needed") or math.ceil(self.total_rounds / 2)
 
         self._image_cache = {}
         self.selected_game = None
@@ -206,9 +209,13 @@ class GameSelect(PlaceholderPage):
             self.teams_frame.columnconfigure(i, weight=1)
             team_colour = TEAM_COLOURS[i] if i < len(TEAM_COLOURS) else FG_COLOUR
  
+            wins = self.game_wins.get(team_name, 0)
+            header_text = f"{team_name}  ({wins}/{self.wins_needed})"
+ 
+            # create the frame for the team name
             box = tk.Frame(self.teams_frame, bg=BUTTON_BG_COLOUR)
             box.grid(row=0, column=i, padx=10, sticky="nsew")
-            tk.Label(box, text=team_name, font=TEAM_HEADER_FONT, bg=BUTTON_BG_COLOUR, fg=team_colour).pack(pady=(10, 10))
+            tk.Label(box, text=header_text, font=TEAM_HEADER_FONT, bg=BUTTON_BG_COLOUR, fg=team_colour).pack(pady=(8, 8))
  
             # create a frame for the player names within the team box
             roster = tk.Frame(box, bg=BUTTON_BG_COLOUR)
@@ -240,15 +247,6 @@ class GameSelect(PlaceholderPage):
             text=f"Round {round_num} of {self.total_rounds} \u2014 {team_name} is choosing...",
             fg=team_colour,
         )
-
-    # TODO REMOVE FOR AN OFFICIAL END PAGE
-    # function to show a wrap up state once every round has already been chosen
-    def _show_complete(self):
-        for widget in self.games_grid_frame.winfo_children():
-            widget.destroy()
-        tk.Label(self.games_grid_frame, text="All games have been chosen!", font=BUTTON_FONT, bg=BG_COLOUR, fg=FG_COLOUR).pack(pady=40)
-        self.turn_label.config(text="Gauntlet complete", fg=FG_COLOUR)
-        self.confirm_button.config(state="disabled")
  
     # function to lock in the chosen game and hand the round off to the game itself
     def _on_confirm(self):

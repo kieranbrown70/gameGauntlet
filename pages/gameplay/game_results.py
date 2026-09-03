@@ -163,7 +163,7 @@ class GameResults(PlaceholderPage):
 
     # function to decide whether the button says "Continue" or "End Game"
     def _refresh_action_button(self):
-        wins_needed = math.ceil(self.total_rounds / 2)
+        wins_needed = self.controller.shared_data.get("wins_needed") or math.ceil(self.total_rounds / 2)
 
         # check whether any team has hit the win threshold
         champion = next((t for t in self.team_names if self.game_wins.get(t, 0) >= wins_needed), None)

@@ -48,7 +48,7 @@ class GameOver(PlaceholderPage):
         self.total_rounds = data.get("num_of_games", 0)
 
         # check to see who won in the end
-        wins_needed = math.ceil(self.total_rounds / 2)
+        wins_needed = self.controller.shared_data.get("wins_needed") or math.ceil(self.total_rounds / 2)
         champion = next((t for t in self.team_names if self.game_wins.get(t, 0) >= wins_needed), None)
 
         if champion and champion in self.team_names:
