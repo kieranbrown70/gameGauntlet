@@ -2,6 +2,7 @@ import math
 import tkinter as tk
 
 from pages.base_page import PlaceholderPage
+from pages.stats_manager import record_game
 from config import (
     BG_COLOUR, FG_COLOUR, BUTTON_BG_COLOUR, BUTTON_HOVER_BG_COLOUR,
     BUTTON_FONT, TITLE_FONT, POSITIVE_COLOUR, NEGATIVE_COLOUR,
@@ -46,6 +47,9 @@ class GameOver(PlaceholderPage):
         self.player_stats = data.get("player_stats", {})
         self.game_wins = data.get("game_wins", {})
         self.total_rounds = data.get("num_of_games", 0)
+
+        # record the new game stats to disk
+        record_game(data.get("player_names", []))
 
         # check to see who won in the end
         wins_needed = self.controller.shared_data.get("wins_needed") or math.ceil(self.total_rounds / 2)

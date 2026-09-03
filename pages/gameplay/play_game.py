@@ -5,6 +5,7 @@ from pathlib import Path
 import tkinter as tk
  
 from pages.base_page import PlaceholderPage
+from pages.stats_manager import record_round
 from config import (
     BG_COLOUR, FG_COLOUR, BUTTON_BG_COLOUR, BUTTON_HOVER_BG_COLOUR,
     BUTTON_FONT, GOLD_OUTLINE_COLOUR, POSITIVE_COLOUR, NEGATIVE_COLOUR,
@@ -470,6 +471,20 @@ class PlayGame(PlaceholderPage):
         # append this result to the running round log for game over to display
         game_name = data.get("current_game", {}).get("name", "Unknown")
         data.setdefault("round_results", []).append({"game": game_name, "winner": winner})
+
+        # record the new game stats to disk
+        record_round(self.player_names, self._round_stats, game_name)
+
+        # in 2 team modes the loser picks next
+        # in FFA rotate by +1 for now (SUBJECT TO CHANGE)
+        team_names = list(self.team_names)
+        num_teams = len(team_names)
+        winner_idx = team_names.index(winner)
+        if num_teams == 2:
+            data["choosing_team"] = 1 - winner_idx
+        else:
+            current_chooser = data.get("choosing_team", 0)
+            data["choosing_team"] = (current_chooser + 1) % num_teams
 
         self.controller.show_frame("GameResults")
 

@@ -256,7 +256,5 @@ class GameSelect(PlaceholderPage):
         data = self.controller.shared_data
         data["games_played"].append(game)
         data["current_game"] = game
-        # advance choosing_team with modulo so 3- and 4-team games cycle correctly
-        data["choosing_team"] = (self.current_team + 1) % len(self.team_names)
  
         self.controller.show_frame("PlayGame")
